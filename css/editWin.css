@@ -1,0 +1,72 @@
+body {
+    font-family: 'CustomFont', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0 0 6px 0;
+    padding: 0;
+    font-size: 13px;
+}
+input[type="text"]:read-only {
+    background-color: #f9f9f9;
+    border: 1px solid #f0f0f0;
+}
+label {
+    font-weight: bold;
+    padding: 0px 10px 0px 10px;
+    color: #4f4f4f;
+}
+
+textarea {
+    resize: none;  /* 禁止用户手动调整 <textarea> 的大小 */
+    overflow-y: hidden; /* 隐藏垂直滚动条 */
+}
+
+.script-form {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 5px 5px 0px 5px;
+    padding: 5px 10px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.item_count_label {
+    padding: 0px 10px 0px 0px;
+}
+.role_name {
+    font-family: 'CustomFont', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+    flex: 0 0 20%; /* 固定20%的宽度 */
+    text-align: center;
+    padding: 8px;
+    margin: 0 0px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    max-width: 8%; /* 最大宽度为20% */
+    font-size: 12px;
+}
+.original_class, .translation_class {
+    font-family: 'CustomFont', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+    flex: 1; /* 占据剩余的宽度 */
+    text-align: center;
+    padding: 8px 10px;
+    margin: 0 0px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    max-width: calc(80% - 20px); /* 最大宽度为80%减去20px */
+    font-size: 12px;
+    font-weight: 500;
+    color: #202020;
+}
+.original_class:focus, .translation_class:focus {
+    border-color: dodgerblue;
+    box-shadow: 0 0 5px dodgerblue;
+    outline: none;
+}
+#script-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}

@@ -1,0 +1,57 @@
+body {
+    font-family: 'CustomFont', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+    margin: 0px 10px;
+    padding: 0px 0px 5px 0px;
+    background-color: #f2f2f2;
+    font-size: 14px;
+}
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+li {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 5px 5px 13px 5px;
+    padding: 15px 0px 15px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    color: #777777;
+    font-weight: 600;
+}
+li:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+h1 {
+    margin: 20px 10px 22px 10px;
+    color: #4a4a4a;
+}
+p {
+    margin: 0 0 0 0;
+    padding: 0 0 0 5px;
+    color: #4a4a4a;
+}
+.head_block {
+    display: flex;
+    align-items: center; /* 使元素在垂直方向上居中 */
+    padding: 0px 0px -5px 0px;
+    margin: 0px 0px -5px 0px;
+}
+.head_title_block {
+    min-width: 150px;
+}
+.head_sub_title_block {
+    padding: 0px;
+    margin: 0px;
+}
+#head_sub_title {
+    font-size: 12px;
+    font-weight: 400;
+}
+#folder_path {
+    font-size: 11px;
+    font-weight: 600;
+}
