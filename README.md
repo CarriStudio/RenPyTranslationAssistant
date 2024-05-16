@@ -2,7 +2,7 @@
 
 一个翻译 Ren'Py 制作的游戏的台词的辅助工具 (An auxiliary tool for translating scripts for games made by Ren'Py.)
 
-Version: **Beta 0.1.3**
+Version: **Beta 0.1.4**
 
 
 
@@ -30,13 +30,16 @@ Version: **Beta 0.1.3**
 
 ### 已实现想法
 
+· 将选项放置在正确的位置（而不是一股脑地放在末尾）
+
 · 支持选择文件夹，扫描文件夹下的所有 rpy 文件
 
 · 支持基本的打开，对话匹配，修改保存
 
 · 加入 electron-builder 打包构建
 
-· 支持导出 .tsv 表格，和导入翻译文件
+· 支持导出 .tsv 表格，支持批量导出原文和译文，和导入翻译文件（单个和批量）
 
 · 自动保存功能（每分钟）
 
+· 批量导出原文和批量导入翻译

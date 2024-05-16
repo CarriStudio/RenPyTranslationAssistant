@@ -1,0 +1,85 @@
+body {
+    font-family: 'CustomFont', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+    font-size: 15px;
+    background-color: #f2f2f2;
+}
+
+h2 {
+    margin: 10px 0 20px 0;
+    color: #4a4a4a;
+    line-height: 1.0;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+li {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 5px 5px 13px 5px;
+    padding: 15px 0px 15px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    color: #777777;
+    font-weight: 600;
+}
+li:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.at_a_glance_content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.at_a_glance_content_block {
+    background-color: #fff; /* 默认按钮背景色 */
+    padding: 10px;
+    margin: 20px 10px 10px 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+    transition: all 0.2s ease; /* 按钮悬浮效果动画 */
+    /* height: 180px; */
+    height: auto;
+    width: 60%;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a8a8a;
+    line-height: 1.2;
+}
+
+.at_a_glance_content_block:first-child {
+    width: 40%;
+}
+
+.at_a_glance_content_block:last-child {
+    margin-right: 15px;
+}
+
+.at_a_glance_content_block p {
+    margin: 5px;
+}
+
+.at_a_glance_content_block:hover {
+    background-color: #f9f9f9; /* 悬浮时按钮背景色 */
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2); /* 悬浮时阴影效果 */
+    cursor: default;
+}
+
+.count_class {
+    display: inline;
+    font-size: 30px;
+    color: #4a4a4a;
+}
+
+.bold_text {
+    font-weight: 600;
+}
+
+.main_area {
+    margin: 10px 13px;
+}

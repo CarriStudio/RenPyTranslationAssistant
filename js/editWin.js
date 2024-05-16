@@ -35,8 +35,10 @@ ipcRenderer.on('readAndMatchRpyFile', (event, targetFilePath) => {
                     if (oldLineMatches) {
                         const originalLineContent = oldLineMatches[1]
                         const translationLineContent = lines[i + 1].match(newLineRegex)[1]
+                        const locateFlagContent = lines[i - 1].match(/:(\d+)/)[1]
                         currentScript = {
                             targetEditLine: i + 1,
+                            locateFlag: locateFlagContent,
                             roleName: '',
                             original: originalLineContent,
                             translation: translationLineContent
@@ -53,6 +55,7 @@ ipcRenderer.on('readAndMatchRpyFile', (event, targetFilePath) => {
                     var roleNameMatch = lines[i + 2].match(/# (.*?) "/u)
                     var originalMatch = lines[i + 2].match(/"(.*?)"/u)
                     var translationMatch = lines[i + 3].match(/"(.*?)"/u)
+                    var locateFlagMatch = lines[i - 1].match(/:(\d+)/)[1]
                     if (!roleNameMatch) {
                         targetEditLineNumber = i + 5
                         roleNameMatch = lines[i + 3].match(/# (.*?) "/u)
@@ -62,6 +65,7 @@ ipcRenderer.on('readAndMatchRpyFile', (event, targetFilePath) => {
                     if (roleNameMatch && roleNameMatch.length >= 2 && originalMatch && originalMatch.length >= 2 && translationMatch && translationMatch.length >= 2) {
                         currentScript = {
                             targetEditLine: targetEditLineNumber,
+                            locateFlag: locateFlagMatch,
                             roleName: roleNameMatch[1],
                             original: originalMatch[1],
                             translation: translationMatch[1]
@@ -72,7 +76,16 @@ ipcRenderer.on('readAndMatchRpyFile', (event, targetFilePath) => {
             }
         }
     })
-    setDelay(200).then(() => {
+    setDelay(300).then(() => {
+        // 根据 locateFlag 的大小排列元素，目的是为了将选项显示在正确的位置
+        // 同时保持 相同 locateFlag 元素 的原始顺序
+        scriptsDict.sort((a, b) => {
+            if (a.locateFlag === b.locateFlag) {
+                return 0
+            } else {
+                return a.locateFlag - b.locateFlag
+            }
+        })
         showDictContent(scriptsDict)
     })
 })
@@ -115,6 +128,7 @@ ipcRenderer.on('exportTSVSheet', (event, encode) => {
     }))
     // 将数据转换为 TSV 格式
     const exportTSVData = scriptsDictToExport.map(item => Object.values(item).join(`\t`))
+    // 接下来交给主进程去处理~
     event.sender.send('chooseTSVExportPath', exportTSVData, encode)
 })
 
@@ -172,6 +186,11 @@ function showDictContent(dictContent) {
         itemCountLabel.className = 'item_count_label'
         itemCountLabel.textContent = itemCount
         form.appendChild(itemCountLabel)
+        // 显示这句话在原文中的行数
+        // const locateFlagLabel = document.createElement('label')
+        // locateFlagLabel.className = 'locate_flag_label'
+        // locateFlagLabel.textContent = script.locateFlag
+        // form.appendChild(locateFlagLabel)
         const roleNameLabel = document.createElement('label')
         roleNameLabel.className = 'role_name_label'
         roleNameLabel.textContent = '人物'

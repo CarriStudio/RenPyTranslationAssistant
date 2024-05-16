@@ -1,6 +1,6 @@
 {
     "name": "renpy-translation-assistant",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "An auxiliary tool for translating scripts for games made by Ren'Py.",
     "homepage": "https://www.carristudio.com/",
     "main": "js/main.js",

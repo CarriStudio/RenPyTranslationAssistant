@@ -7,11 +7,11 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron/main')
 const fs = require('fs')
 const path = require('path')
-const iconv = require('iconv-lite')
 var rpyFolderPath = null
 var rpyFilesList = null
 var mainWin = null
 var editWin = null
+var batchWin = null
 var currentFile = null
 var autoSaveInterval = null
 var autoSaveEnabled = true
@@ -20,7 +20,7 @@ const appIconPath = path.join(__dirname.replace('/app.asar','').replace('js','')
 const appConfigFilePath = path.join(app.getPath('userData'), 'RTA_Config.json');
 const appHelpDocument = `https://github.com/CarriStudio/RenPyTranslationAssistant`
 const appGlobalName = `Ren'Py 翻译助手`
-const appGlobalVersion = `Beta 0.1.3`
+const appGlobalVersion = `Beta 0.1.4`
 const appDescription = `一个好用的翻译「由 Ren'Py 制作的视觉游戏」的工具`
 
 // 全局通用右键菜单项
@@ -37,14 +37,15 @@ const rightMenu = Menu.buildFromTemplate(rightMenuContent)
 // 创建主窗口
 const createMainWindow = () => {
     mainWin = new BrowserWindow({
-        width: 460,
+        width: 420,
         height: 618,
-        show: false,
-        minWidth: 460,
+        show: false,    // 体验增强
+        minWidth: 420,
         minHeight: 618,
         resizable: true,
         icon: appIconPath,
         webPreferences: {
+            // 允许渲染进程直接使用 Node.js
             nodeIntegration: true,
             contextIsolation: false,
             additionalArguments: ['--allow-file-access-from-files'] // 允许从文件加载资源
@@ -55,7 +56,9 @@ const createMainWindow = () => {
         {
             label: '文件(&F)(F)',
             submenu: [
-                { label: '打开文件夹', accelerator: 'CmdOrCtrl+O', click() { chooseFolder() } },
+                { label: '打开文件夹', accelerator: 'CmdOrCtrl+O', click() { chooseFolder(mainWin, 'chooseRpyFolder', '选择目标 .rpy 文件夹') } },
+                { type: 'separator' },
+                { label: '批量操作', accelerator: 'CmdOrCtrl+B', click() { createBatchWindow() } },
                 { type: 'separator' },
                 {
                     label: '退出',
@@ -75,12 +78,16 @@ const createMainWindow = () => {
             ]
         },
     ]
+    // 创建菜单栏
     Menu.setApplicationMenu(Menu.buildFromTemplate(mainWinMenuList))
+    // 加载页面文件
     mainWin.loadFile('html/mainWin.html')
+    // 利用 ready-to-show 配合上面的 show: false 实现更贴近原生软件的窗口展示体验
     mainWin.on('ready-to-show', () => {
         mainWin.show()
         mainWin.setTitle(`${appGlobalName} (${appGlobalVersion})`)
     })
+    // 页面关闭事件
     mainWin.on('close', () => {
         app.quit()
     })
@@ -91,7 +98,7 @@ const createEditWindow = () => {
     editWin = new BrowserWindow({
         width: 1000,
         height: 618,
-        show: false,
+        show: false,    // 配合下方体验增强
         minWidth: 1000,
         minHeight: 618,
         resizable: true,
@@ -110,9 +117,8 @@ const createEditWindow = () => {
                 { label: '重新加载', accelerator: 'CmdOrCtrl+R', click() { editWin.destroy(); editRpyFileFun(currentFile) } },
                 { type: 'separator' },
                 { label: '导入翻译文本', accelerator: 'CmdOrCtrl+I', click() { chooseImportFile() } },
-                { label: '导出 TSV ...', submenu: [
-                    { label: '为 GBK（ANSI）格式', click() { editWin.webContents.send('exportTSVSheet', 'GBK(ANSI)') } },
-                    { label: '为 UTF-8 格式', click() { editWin.webContents.send('exportTSVSheet', 'UTF-8') } }
+                { label: '导出翻译用表格 ...', submenu: [
+                    { label: '为 UTF-8 的 TSV 格式', click() { editWin.webContents.send('exportTSVSheet') } }
                 ] },
                 { type: 'separator' },
                 {
@@ -155,14 +161,21 @@ const createEditWindow = () => {
             ]
         },
     ]
+    // 创建菜单栏
     editWin.setMenu(Menu.buildFromTemplate(editWinMenuList))
+    // 加载页面文件
     editWin.loadFile('html/editWin.html')
+    // 体验增强
     editWin.on('ready-to-show', () => {
         editWin.show()
     })
+    // 创建右键菜单
     editWin.webContents.on('context-menu', () => {
         rightMenu.popup()
     })
+    // 在页面加载后，自动开启开发者工具
+    // editWin.webContents.openDevTools()
+    // 页面关闭的 close 事件
     editWin.on('close', (event) => {
         if (autoSaveInterval) {
             clearInterval(autoSaveInterval)
@@ -170,6 +183,62 @@ const createEditWindow = () => {
         event.preventDefault()
         editWin.webContents.send('saveChanges', 1)
     })
+}
+
+// 创建批量操作窗口
+const createBatchWindow = () => {
+    batchWin = new BrowserWindow({
+        width: 350,
+        height: 450,
+        show: false,    // 配合下方体验增强
+        minWidth: 350,
+        minHeight: 450,
+        resizable: true,
+        icon: appIconPath,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        }
+    })
+    // 菜单栏内容
+    let batchWinMenuList = [
+        {
+            label: '文件(&F)(F)',
+            submenu: [
+                {
+                    label: '关闭',
+                    click() { batchWin.close() }
+                },
+            ]
+        },
+        {
+            label: '帮助(&H)(H)',
+            submenu: [
+                { label: '帮助信息', accelerator: 'CmdOrCtrl+H', click() { shell.openExternal(appHelpDocument) } },
+                { type: 'separator' },
+                { label: '开发人员工具', role: 'toggleDevTools' },
+            ]
+        },
+    ]
+    // 创建菜单栏
+    batchWin.setMenu(Menu.buildFromTemplate(batchWinMenuList))
+    // 加载页面文件
+    batchWin.loadFile('html/batchWin.html')
+    // 体验增强
+    batchWin.on('ready-to-show', () => {
+        batchWin.show()
+        batchWin.webContents.send('scanTargetFolder', rpyFolderPath, rpyFilesList)
+    })
+    // 创建右键菜单
+    batchWin.webContents.on('context-menu', () => {
+        rightMenu.popup()
+    })
+    // 在页面加载后，自动开启开发者工具
+    // batchWin.webContents.openDevTools()
+    // 页面关闭的 close 事件
+    // batchWin.on('close', (event) => {
+    //     event.preventDefault()
+    // })
 }
 
 // 创建默认配置文件
@@ -206,14 +275,22 @@ function updateConfig(newConfigData) {
     fs.writeFileSync(appConfigFilePath, JSON.stringify(updatedConfig))
 }
 
-// 选择文件夹
-function chooseFolder() {
-    dialog.showOpenDialog(mainWin, {
-        title: '选择目标 .rpy 文件夹',
+// 选择文件夹（复用）
+function chooseFolder(winName, purpose, winTitle) {
+    dialog.showOpenDialog(winName, {
+        title: winTitle,
         properties: ['openDirectory']
     }).then(result => {
         if (!result.canceled) {
-            mainWin.webContents.send('selectedFolderPath', result.filePaths[0])
+            if (purpose === 'chooseRpyFolder') {
+                mainWin.webContents.send('selectedFolderPath', result.filePaths[0])
+            } else if (purpose === 'chooseOriginalExportFolder') {
+                batchWin.webContents.send('batchExportAllScripts', result.filePaths[0])
+            } else if (purpose === 'chooseTranslationExportFolder') {
+                batchWin.webContents.send('batchExportAllTranslations', result.filePaths[0])
+            } else if (purpose === 'chooseTranslationImportFolder') {
+                batchWin.webContents.send('batchImportTranslations', result.filePaths[0])
+            }
         }
     }).catch(err => {
         console.log(err)
@@ -227,10 +304,12 @@ function autoSaveFunction() {
         autoSaveInterval = setInterval(() => {
             editWin.webContents.send('autoSave')
         }, 1 * 60 * 1000)   // 每分钟保存一次
+        // 修改配置文件
         updateConfig({autoSave: true})
     } else if (autoSaveInterval) {
         // 关闭自动保存
         clearInterval(autoSaveInterval)
+        // 并修改配置文件
         updateConfig({autoSave: false})
     }
 }
@@ -321,25 +400,21 @@ ipcMain.on('openRpyFile', (event, file) => {
 })
 
 // 导出 TSV 的保存窗口
-ipcMain.on('chooseTSVExportPath', (event, tsvData, encode) => {
+ipcMain.on('chooseTSVExportPath', (event, tsvData) => {
     let csvBuffer = null
-    if (encode === 'GBK(ANSI)') {
-        csvBuffer = iconv.encode([`角色代号\t原文\t译文`].concat(tsvData).join('\n'), 'gbk')
-    } else {
-        csvBuffer = [`角色代号\t原文\t译文`].concat(tsvData).join('\n')
-    }
+    csvBuffer = [`角色代号\t原文\t译文`].concat(tsvData).join('\n')
     dialog.showSaveDialog({
-        title: `导出 TSV 表格 - ${encode}`,
+        title: `导出 TSV 表格 - UTF-8`,
         defaultPath: `${currentFile.replace('.rpy','')}_export.tsv`,
         buttonLabel: '保存',
         filters: [{ name: 'TSV 表格', extensions: ['tsv'] }],
     }).then(result => {
         if (!result.canceled) {
             fs.writeFileSync(result.filePath, csvBuffer)
-            dialogWin(`导出 TSV 表格 - ${encode}`, `已成功导出至\n${result.filePath}`, 'info')
+            dialogWin(`导出 TSV 表格 - UTF-8`, `已成功导出至\n${result.filePath}`, 'info')
         }
     }).catch(err => {
-        dialogWin(`导出 TSV 表格 - ${encode}`, `导出失败！\n\n${err}`, 'error')
+        dialogWin(`导出 TSV 表格 - UTF-8`, `导出失败！\n\n${err}`, 'error')
     })
 })
 
@@ -371,6 +446,20 @@ ipcMain.on('askAboutSaving', (event) => {
 // 强行关闭编辑窗口
 ipcMain.on('forceCloseWin', (event) => {
     editWin.destroy()
+})
+
+// 批量导出时选择保存文件夹
+ipcMain.on('chooseExportFolder', (event, content) => {
+    if (content === 'Original') {
+        chooseFolder(batchWin, 'chooseOriginalExportFolder', '选择保存文件夹')
+    } else if (content === 'Translation') {
+        chooseFolder(batchWin, 'chooseTranslationExportFolder', '选择保存文件夹')
+    }
+})
+
+// 选择批量导入翻译的文件夹
+ipcMain.on('chooseTranslationImportFolder', (event) => {
+    chooseFolder(batchWin, 'chooseTranslationImportFolder', '选择导入文件夹')
 })
 
 // 程序启动事件

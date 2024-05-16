@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <!-- <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'"
+        /> -->
+        <meta
+            http-equiv="X-Content-Security-Policy"
+            content="default-src 'self'; script-src 'self'"
+        />
+        <title>批量操作 - Ren'Py 翻译助手</title>
+        <link rel="stylesheet" href="../css/batchWin.css" />
+    </head>
+    <body>
+        <div class="at_a_glance">
+            <!-- <div class="at_a_glance_title">
+                <h2>概要</h2>
+            </div> -->
+            <div class="at_a_glance_content">
+                <div class="at_a_glance_content_block">
+                    <p>共有</p>
+                    <p id="file_count" class="count_class">...</p>个
+                    <p class="bold_text">脚本文件</p>
+                </div>
+                <div class="at_a_glance_content_block">
+                    <p>共有</p>
+                    <p id="sentence_count" class="count_class">...</p>句
+                    <p class="bold_text">台词</p>
+                </div>
+            </div>
+        </div>
+        <div class="main_area">
+            <div class="main_area_title">
+                <h2>操作区</h2>
+            </div>
+            <div class="main_area_content_block">
+                <ul id="options">
+                    <li id="batch_export_all_original">批量导出原文(Export, Original Text)</li>
+                    <li id="batch_export_all_translations">批量导出译文(Export, Translation)</li>
+                    <li id="batch_import_all_file">批量导入译文(Import, Translation)</li>
+                </ul>
+            </div>
+        </div>
+    </body>
+    <script src="../js/batchWin.js"></script>
+</html>
