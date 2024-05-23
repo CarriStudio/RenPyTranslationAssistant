@@ -1,8 +1,10 @@
 # Ren'Py 翻译助手 (Ren'Py Translation Assistant)
 
-一个翻译 Ren'Py 制作的游戏的台词的辅助工具 (An auxiliary tool for translating scripts for games made by Ren'Py.)
+一个人工翻译 Ren'Py 制作的游戏的台词的辅助工具 (An auxiliary tool for translating scripts for games made by Ren'Py.)
 
-Version: **Beta 0.1.4**
+致力于提供最好的人工翻译体验
+
+Version: **Beta 0.1.5**
 
 
 

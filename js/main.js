@@ -20,7 +20,7 @@ const appIconPath = path.join(__dirname.replace('/app.asar','').replace('js','')
 const appConfigFilePath = path.join(app.getPath('userData'), 'RTA_Config.json');
 const appHelpDocument = `https://github.com/CarriStudio/RenPyTranslationAssistant`
 const appGlobalName = `Ren'Py 翻译助手`
-const appGlobalVersion = `Beta 0.1.4`
+const appGlobalVersion = `Beta 0.1.5`
 const appDescription = `一个好用的翻译「由 Ren'Py 制作的视觉游戏」的工具`
 
 // 全局通用右键菜单项
@@ -115,11 +115,11 @@ const createEditWindow = () => {
             submenu: [
                 { label: '保存', accelerator: 'CmdOrCtrl+S', click() { editWin.webContents.send('saveChanges', 0) } },
                 { label: '重新加载', accelerator: 'CmdOrCtrl+R', click() { editWin.destroy(); editRpyFileFun(currentFile) } },
-                { type: 'separator' },
-                { label: '导入翻译文本', accelerator: 'CmdOrCtrl+I', click() { chooseImportFile() } },
-                { label: '导出翻译用表格 ...', submenu: [
-                    { label: '为 UTF-8 的 TSV 格式', click() { editWin.webContents.send('exportTSVSheet') } }
-                ] },
+                // { type: 'separator' },
+                // { label: '导入翻译文本', accelerator: 'CmdOrCtrl+I', click() { chooseImportFile() } },
+                // { label: '导出翻译用表格 ...', submenu: [
+                //     { label: '为 UTF-8 的 TSV 格式', click() { editWin.webContents.send('exportTSVSheet') } }
+                // ] },
                 { type: 'separator' },
                 {
                     label: '关闭',
@@ -245,6 +245,7 @@ const createBatchWindow = () => {
 function createDefaultConfigFile() {
     const defaultConfig = {
         autoSave: true,
+        rpyFolderPath: '',
     }
     fs.writeFileSync(appConfigFilePath, JSON.stringify(defaultConfig))
     return defaultConfig
@@ -263,8 +264,20 @@ function loadConfigFile() {
 
 // 使配置参数生效
 function enableConfig(configData) {
-    if (configData.autoSave === false) {
-        autoSaveEnabled = false
+    if (configData.autoSave !== undefined) {
+        if (configData.autoSave === false) {
+            autoSaveEnabled = false
+        }
+    }
+    if (configData.rpyFolderPath !== undefined) {
+        if (configData.rpyFolderPath !== '') {
+            fs.access(configData.rpyFolderPath, fs.constants.F_OK, (err) => {
+                if (!err) {
+                    // 向主进程发送，切换文件夹
+                    mainWin.webContents.send('selectedFolderPath', configData.rpyFolderPath)
+                }
+            })
+        }
     }
 }
 
@@ -284,6 +297,8 @@ function chooseFolder(winName, purpose, winTitle) {
         if (!result.canceled) {
             if (purpose === 'chooseRpyFolder') {
                 mainWin.webContents.send('selectedFolderPath', result.filePaths[0])
+                // 调用函数记录本次选择的目录，以便下次打开软件时使用
+                updateConfig({rpyFolderPath: result.filePaths[0]})
             } else if (purpose === 'chooseOriginalExportFolder') {
                 batchWin.webContents.send('batchExportAllScripts', result.filePaths[0])
             } else if (purpose === 'chooseTranslationExportFolder') {
@@ -336,7 +351,7 @@ function dialogWin(title, content, type) {
     })
 }
 
-// 选择需要导入的文件
+// 编辑窗口中，选择需要导入的单个文件
 function chooseImportFile() {
     dialog.showOpenDialog(editWin, {
         properties: ['openFile'],
@@ -349,7 +364,7 @@ function chooseImportFile() {
                     console.error(err)
                     return
                 }
-                const lines = data.split('\n')
+                const lines = data.split(/\r?\n/)
                 editWin.webContents.send('returnImportFileContent', lines)
             })
         }

@@ -205,7 +205,7 @@ function importTranslation(currentImportFile, currentRpyFile) {
         let importTranslationContent = []
         try {
             const data = fs.readFileSync(currentImportFile, 'utf-8')
-            importTranslationContent = data.split('\n')
+            importTranslationContent = data.split(/\r?\n/)
         } catch (err) {
             reject('读取文件时出现错误: ', err)
         }

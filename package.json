@@ -1,6 +1,6 @@
 {
     "name": "renpy-translation-assistant",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "An auxiliary tool for translating scripts for games made by Ren'Py.",
     "homepage": "https://www.carristudio.com/",
     "main": "js/main.js",
@@ -13,7 +13,7 @@
     "keywords": [
         "translate"
     ],
-    "author": "CarriStudio <we@carristudio.site> (https://www.carristudio.com/)",
+    "author": "CarriStudio <we@carristudio.com> (https://www.carristudio.com/)",
     "license": "GPL-3.0",
     "devDependencies": {
         "electron": "^29.2.0",
